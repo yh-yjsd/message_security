@@ -1,0 +1,1087 @@
+<!--⚠️ 免责声明
+
+本工具仅供学习与娱乐使用，采用自定义加密算法，不具备商业级或军事级安全性。请勿用于加密密码、私钥、个人隐私或其他敏感信息。作者不对因使用本工具导致的任何数据泄露、信息损失或其他后果承担责任。加密前请自行备份原文。 -->
+<!--本程序由玖命和安歌联合创作 -->
+<!-- v1.5.9 自定义主题版 · 新增调色盘换肤 + 预设主题 + 亮暗模式 -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加密 / 解密 v1.5</title>
+<style>
+/* ==================== 主题变量 ==================== */
+:root {
+  --user-primary: #c77dff;
+  --primary-dark: color-mix(in srgb, var(--user-primary), #000 40%);
+  --primary-darker: color-mix(in srgb, var(--user-primary), #000 65%);
+  --primary-light: color-mix(in srgb, var(--user-primary), #fff 20%);
+  --primary-glow: color-mix(in srgb, var(--user-primary), transparent 70%);
+  --border-alpha: color-mix(in srgb, var(--user-primary), transparent 70%);
+  --border-solid: color-mix(in srgb, var(--user-primary), transparent 50%);
+  --bg-grad-1: color-mix(in srgb, var(--user-primary), #000 85%);
+  --bg-grad-2: color-mix(in srgb, var(--user-primary), #000 95%);
+  --bg-base: #000;
+  --text-title: var(--user-primary);
+  --text-label: color-mix(in srgb, var(--user-primary), #fff 30%);
+  --text-sub: color-mix(in srgb, var(--user-primary), transparent 45%);
+  --panel-bg: color-mix(in srgb, var(--user-primary), #000 88%);
+  --input-bg: color-mix(in srgb, var(--user-primary), #000 80%);
+  --input-readonly-bg: color-mix(in srgb, var(--user-primary), #000 92%);
+}
+
+/* ☀️ 亮色模式变量覆盖 */
+[data-theme="light"] {
+  --bg-grad-1: color-mix(in srgb, var(--user-primary), #fff 88%);
+  --bg-grad-2: color-mix(in srgb, var(--user-primary), #fff 96%);
+  --bg-base: #f4f4f8;
+  --text-title: color-mix(in srgb, var(--user-primary), #000 25%);
+  --text-label: color-mix(in srgb, var(--user-primary), #000 35%);
+  --text-sub: color-mix(in srgb, var(--user-primary), #000 55%);
+  --primary-glow: color-mix(in srgb, var(--user-primary), transparent 85%);
+  --border-alpha: color-mix(in srgb, var(--user-primary), transparent 62%);
+  --border-solid: color-mix(in srgb, var(--user-primary), transparent 55%);
+  --panel-bg: color-mix(in srgb, var(--user-primary), #fff 92%);
+  --input-bg: color-mix(in srgb, var(--user-primary), #fff 95%);
+  --input-readonly-bg: color-mix(in srgb, var(--user-primary), #fff 88%);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+background:radial-gradient(ellipse at top,var(--bg-grad-1) 0%,var(--bg-grad-2) 50%,var(--bg-base) 100%);
+min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;
+transition:background .4s ease;
+}
+.container{
+background:var(--panel-bg);backdrop-filter:blur(16px);
+border:1px solid var(--border-alpha);border-radius:16px;
+box-shadow:0 0 40px var(--primary-glow),inset 0 0 20px var(--primary-glow);
+width:100%;max-width:580px;padding:28px 24px;
+transition:background .4s ease,border-color .4s ease,box-shadow .4s ease;
+}
+h1{
+text-align:center;color:var(--text-title);font-size:22px;margin-bottom:6px;
+text-shadow:0 0 12px var(--primary-glow);
+transition:color .4s ease,text-shadow .4s ease;
+}
+.subtitle{text-align:center;color:var(--text-sub);font-size:12px;margin-bottom:16px;letter-spacing:.5px;}
+label{display:block;font-weight:600;color:var(--text-label);margin:12px 0 5px;font-size:13px;letter-spacing:.3px;transition:color .4s ease;}
+textarea{
+width:100%;height:100px;padding:12px 14px;
+border:1.5px solid var(--border-alpha);border-radius:10px;
+font-size:13px;resize:vertical;font-family:'Courier New',monospace;
+background:var(--input-bg);color:var(--text-label);
+transition:border-color .2s,box-shadow .2s,color .2s,background .4s ease;
+}
+textarea:focus{outline:none;border-color:var(--user-primary);box-shadow:0 0 10px var(--primary-glow);}
+textarea[readonly]{background:var(--input-readonly-bg);color:var(--text-title);}
+textarea.out-std{color:var(--text-title);}
+textarea.out-buddha{color:#ffd76b;font-family:'STKaiti','KaiTi','SimSun',serif;letter-spacing:1px;}
+textarea.out-bear{color:#ffb37b;font-family:'Yuanti SC','YouYuan','Microsoft YaHei',sans-serif;letter-spacing:1px;}
+textarea.out-sage{color:#8be9fd;font-family:'STKaiti','KaiTi','SimSun',serif;letter-spacing:1px;}
+input[type="password"],input[type="text"]{
+width:100%;padding:11px 14px;
+border:1.5px solid var(--border-alpha);border-radius:10px;
+font-size:15px;background:var(--input-bg);color:var(--text-label);
+transition:border-color .2s,box-shadow .2s,background .4s ease,color .4s ease;
+}
+input:focus{outline:none;border-color:var(--user-primary);box-shadow:0 0 10px var(--primary-glow);}
+::placeholder{color:var(--text-sub);}
+.key-row{display:flex;gap:8px;align-items:flex-end;}
+.key-row input{flex:1;}
+.toggle-pwd{
+padding:9px 13px;border:1.5px solid var(--border-alpha);border-radius:10px;
+cursor:pointer;user-select:none;font-size:14px;
+background:var(--input-bg);color:var(--text-label);transition:.15s;
+}
+.toggle-pwd:hover{background:var(--primary-dark);color:#fff;}
+.slider-row{display:flex;align-items:center;gap:12px;margin-top:8px;}
+.slider-row input[type="range"]{
+flex:1;-webkit-appearance:none;height:5px;border-radius:3px;
+background:linear-gradient(to right,var(--primary-dark),var(--user-primary));outline:none;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb{
+-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+background:var(--user-primary);cursor:pointer;box-shadow:0 0 8px var(--primary-glow);
+}
+.slider-row span{color:var(--user-primary);font-weight:700;font-size:14px;min-width:20px;text-align:center;}
+/* 模式切换 */
+.mode-tabs{display:flex;gap:8px;margin-bottom:4px;}
+.mode-tab{
+flex:1;text-align:center;padding:9px;border-radius:10px;cursor:pointer;user-select:none;
+font-size:13.5px;font-weight:700;color:var(--text-label);transition:.15s;
+background:var(--input-bg);border:1.5px solid var(--border-alpha);
+}
+.mode-tab:hover{background:var(--primary-dark);}
+.mode-tab.active{
+color:#fff;background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));
+border-color:var(--user-primary);box-shadow:0 0 12px var(--primary-glow);
+}
+/* 图片拖放区 */
+.dropzone{
+border:2px dashed var(--border-alpha);border-radius:12px;padding:18px 14px;
+text-align:center;cursor:pointer;transition:.2s;background:var(--input-bg);
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--user-primary);background:var(--primary-dark);}
+.dropzone.cipher-detected{border-color:rgba(139,233,253,.65);background:rgba(10,45,60,.45);}
+.dz-idle{color:var(--text-label);font-size:13px;line-height:1.8;}
+.dz-idle small{display:block;color:var(--text-sub);font-size:11px;}
+#previewImg{max-width:100%;max-height:180px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.5);}
+.image-result img{max-width:100%;max-height:260px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.55);image-rendering:pixelated;}
+.dz-meta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.file-info{color:var(--user-primary);font-size:12px;word-break:break-all;}
+.file-info.cipher{color:#8be9fd;}
+.mini-btn{
+flex:0 0 auto;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;
+border:1px solid var(--border-alpha);background:var(--input-bg);color:var(--text-label);transition:.15s;
+}
+.mini-btn:hover{background:var(--primary-dark);color:#fff;}
+/* 压缩选项 */
+.compress-row{
+display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12.5px;
+color:var(--text-label);cursor:pointer;user-select:none;line-height:1.5;
+}
+.compress-row input{accent-color:var(--user-primary);width:15px;height:15px;cursor:pointer;flex:0 0 auto;}
+.compress-row small{color:var(--text-sub);font-size:11px;}
+/* 输出样式切换 */
+.style-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+.style-pill{
+flex:1;text-align:center;padding:9px 4px;border-radius:10px;cursor:pointer;user-select:none;
+font-size:13px;font-weight:600;color:var(--text-label);white-space:nowrap;
+background:var(--input-bg);border:1.5px solid var(--border-alpha);transition:.15s;
+}
+.style-pill:hover{background:var(--primary-dark);}
+.style-pill.active{
+color:#fff;border-color:var(--user-primary);background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));
+box-shadow:0 0 12px var(--primary-glow);
+}
+.btn-group{display:flex;gap:8px;margin-top:16px;}
+button{
+flex:1;padding:12px;border:none;border-radius:10px;
+font-size:14px;font-weight:700;cursor:pointer;color:#fff;
+transition:all .2s;
+}
+.btn-enc{background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));}
+.btn-dec{background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));}
+.btn-clr{background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));flex:.55;}
+.btn-cpy{background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));margin-top:10px;}
+button:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--primary-glow);}
+button:active{transform:translateY(0);}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+/* 状态行 */
+.status-line{min-height:16px;font-size:11.5px;color:var(--text-sub);margin-top:8px;letter-spacing:.3px;line-height:1.5;word-break:break-all;}
+/* 图片 / 密图结果面板 */
+.image-result{
+margin-top:12px;padding:12px;border:1px solid var(--border-alpha);
+border-radius:12px;background:var(--input-bg);text-align:center;
+}
+.image-result.cipher-panel{border-color:rgba(139,233,253,.4);}
+.panel-title{font-size:13px;font-weight:700;color:var(--user-primary);margin-bottom:8px;letter-spacing:.5px;}
+.cipher-panel .panel-title{color:#8be9fd;}
+.dec-info{color:var(--user-primary);font-size:12.5px;margin-top:8px;word-break:break-all;line-height:1.6;}
+.img-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-dl{background:linear-gradient(135deg,#0e7490,#0891b2);}
+.btn-cpyimg{background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));}
+.hint-line{font-size:11px;color:var(--text-sub);margin-top:8px;line-height:1.6;}
+/* 轻提示 */
+#toast{
+position:fixed;top:18px;left:50%;transform:translateX(-50%);
+padding:10px 18px;border-radius:10px;font-size:13px;color:#fff;z-index:99;max-width:90vw;
+background:var(--panel-bg);border:1px solid var(--border-alpha);
+box-shadow:0 4px 24px var(--primary-glow);
+opacity:0;pointer-events:none;transition:opacity .25s;
+}
+#toast.show{opacity:1;}
+#toast.err{background:rgba(120,20,60,.95);border-color:rgba(255,100,140,.5);box-shadow:0 4px 24px rgba(200,30,90,.5);}
+/* ===== 历史记录面板 ===== */
+#historyBlock{margin-top:12px;}
+#historyList{max-height:200px;overflow-y:auto;}
+.hist-item{
+background:var(--input-bg);border:1px solid var(--border-alpha);border-radius:8px;
+padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:.15s;
+}
+.hist-item:hover{background:var(--primary-dark);border-color:var(--border-solid);}
+.hist-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.hist-tag{font-size:11px;font-weight:700;}
+.hist-tag.enc{color:var(--user-primary);}
+.hist-tag.dec{color:#8be9fd;}
+.hist-time{font-size:10px;color:var(--text-sub);}
+.hist-text{
+font-size:12.5px;color:var(--text-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+line-height:1.4;
+}
+.hist-empty{color:var(--text-sub);font-size:12px;text-align:center;padding:10px;}
+.hist-mini-btn{
+border:1px solid var(--border-alpha);border-radius:8px;cursor:pointer;
+background:var(--input-bg);color:var(--text-label);transition:.15s;
+}
+.hist-mini-btn:hover{background:var(--primary-dark);color:#fff;}
+/* ===== 主题面板 ===== */
+.theme-panel{
+background:var(--input-bg);border:1px solid var(--border-alpha);border-radius:12px;
+padding:12px 14px;margin-bottom:16px;
+}
+.theme-panel-title{
+font-size:12px;color:var(--text-sub);margin-bottom:10px;letter-spacing:.5px;
+display:flex;align-items:center;gap:6px;
+}
+.theme-row{
+display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+}
+.theme-row .theme-label{font-size:12px;color:var(--text-sub);}
+input[type="color"]#themeColorPicker{
+-webkit-appearance:none;border:none;padding:0;cursor:pointer;
+width:34px;height:24px;border-radius:6px;
+background:none;
+}
+input[type="color"]#themeColorPicker::-webkit-color-swatch-wrapper{padding:0;}
+input[type="color"]#themeColorPicker::-webkit-color-swatch{border:none;border-radius:6px;}
+.preset-dot{
+width:20px;height:20px;border-radius:50%;
+border:2px solid var(--border-alpha);
+cursor:pointer;padding:0;transition:transform .2s,border-color .2s;
+box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.preset-dot:hover{transform:scale(1.25);border-color:var(--user-primary);}
+.preset-dot.active{border-color:#fff;box-shadow:0 0 8px var(--user-primary);}
+.theme-divider{width:1px;height:20px;background:var(--border-alpha);margin:0 6px;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>加密 / 解密</h1>
+<div class="subtitle">v1.5 · 文本加密 · 密图（图片 ⇄ 图片）</div>
+
+<!-- ====== 主题面板 ====== -->
+<div class="theme-panel">
+  <div class="theme-panel-title">🎨 自定义主题色</div>
+  <div class="theme-row">
+    <span class="theme-label">调色盘：</span>
+    <input type="color" id="themeColorPicker" value="#c77dff" title="自由选择颜色">
+    <span class="theme-label" style="margin-left:4px;">预设：</span>
+    <button class="preset-dot" data-color="#c77dff" style="background:#c77dff;" title="默认紫"></button>
+    <button class="preset-dot" data-color="#4facfe" style="background:#4facfe;" title="科技蓝"></button>
+    <button class="preset-dot" data-color="#43e97b" style="background:#43e97b;" title="极客绿"></button>
+    <button class="preset-dot" data-color="#fa709a" style="background:#fa709a;" title="少女粉"></button>
+    <button class="preset-dot" data-color="#f6d365" style="background:#f6d365;" title="暖阳橙"></button>
+    <button class="preset-dot" data-color="#ff9a9e" style="background:#ff9a9e;" title="樱花粉"></button>
+    <span class="theme-divider"></span>
+    <button type="button" id="themeModeToggle" class="mini-btn" style="padding:3px 8px; font-size:11px;">☀️ 亮</button>
+    <button type="button" class="mini-btn" onclick="resetTheme()" style="padding:3px 8px; font-size:11px;">🔄 重置</button>
+  </div>
+</div>
+
+<div class="mode-tabs">
+<div class="mode-tab active" data-mode="text" onclick="setMode('text')">📝 文本</div>
+<div class="mode-tab" data-mode="image" onclick="setMode('image')">🖼 密图</div>
+</div>
+<div id="imageZone" style="display:none">
+<label>选择图片或密图</label>
+<div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+<input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFilePicked(this)">
+<div id="dzIdle" class="dz-idle">🖼 点击选择 / 拖拽 / Ctrl+V 粘贴
+<small>加密：放入普通图片 ｜ 解密：放入密图（自动识别）</small>
+</div>
+<div id="dzPreview" style="display:none">
+<img id="previewImg" alt="预览">
+<div class="dz-meta">
+<span id="fileInfo" class="file-info"></span>
+<button type="button" class="mini-btn" onclick="event.stopPropagation();clearFile()">✖ 移除</button>
+</div>
+</div>
+</div>
+<label class="compress-row">
+<input type="checkbox" id="autoCompress" checked>
+<span>发送前自动压缩大图（&gt;150KB 时生效，密图更小）<br><small>压缩为 JPEG 质量 82%，透明背景将变为白色</small></span>
+</label>
+</div>
+<div id="inputBlock">
+<div style="display:flex; align-items:center; justify-content:space-between; margin:12px 0 5px;">
+<label id="inputLabel" style="margin:0;">输入内容</label>
+<button type="button" class="mini-btn" onclick="clearInput()" style="padding:2px 8px; font-size:11px;">✖ 清空</button>
+</div>
+<textarea id="input" placeholder="输入要加密或解密的文本..." onfocus="this.select()"></textarea>
+</div>
+<div id="keyBlock">
+<label>密钥</label>
+<div class="key-row">
+<input type="password" id="password" placeholder="输入密钥...">
+<span class="toggle-pwd" onclick="togglePwd()">👁</span>
+</div>
+</div>
+<div id="densityBlock">
+<label>随机符号密度（越小越密）</label>
+<div class="slider-row">
+<input type="range" id="density" min="1" max="10" value="3" oninput="document.getElementById('dval').textContent=this.value">
+<span id="dval">3</span>
+</div>
+</div>
+<div id="styleBlock">
+<label>输出样式</label>
+<div class="style-row">
+<div class="style-pill active" data-style="std" onclick="setStyle('std')">⚡ 标准</div>
+<div class="style-pill" data-style="buddha" onclick="setStyle('buddha')">🙏 佛曰</div>
+<div class="style-pill" data-style="bear" onclick="setStyle('bear')">🐻 熊语</div>
+<div class="style-pill" data-style="sage" onclick="setStyle('sage')">📜 圣人云</div>
+</div>
+</div>
+<div class="btn-group">
+<button class="btn-enc" id="encBtn" onclick="doEnc()">🔒 加密</button>
+<button class="btn-dec" id="decBtn" onclick="doDec()">🔓 解密</button>
+<button class="btn-clr" id="clrBtn" onclick="doClear()">🗑 清空</button>
+</div>
+<div id="statusLine" class="status-line"></div>
+<div id="outputBlock">
+<label>结果</label>
+<textarea id="output" class="out-std" readonly placeholder="结果将显示在这里..." onclick="if(this.value)this.select()"></textarea>
+<button class="btn-cpy" id="copyBtn" onclick="copyResult()">📋 一键复制</button>
+</div>
+<div id="historyBlock" style="display:none;">
+<div style="display:flex; align-items:center; justify-content:space-between; margin:12px 0 5px;">
+<label style="margin:0;">🕘 历史记录</label>
+<button type="button" class="hist-mini-btn" onclick="clearHistory()" style="padding:2px 8px; font-size:11px;">🗑 清空全部</button>
+</div>
+<div id="historyList"></div>
+</div>
+<div id="cipherOut" class="image-result cipher-panel" style="display:none">
+<div class="panel-title">🛡 密图已生成</div>
+<img id="cipherImg" alt="密图">
+<div id="cipherInfo" class="dec-info"></div>
+<div class="img-actions">
+<button type="button" id="dlCipherBtn" class="btn-dl" onclick="downloadCipher()">⬇ 下载密图</button>
+<button type="button" id="cpyCipherBtn" class="btn-cpyimg" onclick="copyCipherImage()">📋 复制密图</button>
+</div>
+<div class="hint-line">⚠️ 请勾选「原图」或以文件方式发送，普通发送会被聊天软件压缩损坏</div>
+</div>
+<div id="imageResult" class="image-result" style="display:none">
+<div class="panel-title">🖼 解密成功</div>
+<img id="decImg" alt="解密出的图片">
+<div id="decInfo" class="dec-info"></div>
+<div class="img-actions">
+<button type="button" id="dlBtn" class="btn-dl" onclick="downloadDec()">⬇ 下载原图</button>
+<button type="button" id="cpyImgBtn" class="btn-cpyimg" onclick="copyDecImage()">📋 复制图片</button>
+</div>
+</div>
+</div>
+<div id="toast"></div>
+<script>
+/* ==================== 自定义主题色 + 亮暗模式 ==================== */
+(function initThemeSystem() {
+  const picker = document.getElementById('themeColorPicker');
+  const dots = document.querySelectorAll('.preset-dot');
+  const modeToggle = document.getElementById('themeModeToggle');
+
+  const savedColor = localStorage.getItem('jmUserThemeColor') || '#c77dff';
+  const savedMode = localStorage.getItem('jmUserThemeMode') || 'dark';
+
+  applyTheme(savedColor, savedMode);
+  picker.value = savedColor;
+  highlightDot(savedColor);
+
+  picker.addEventListener('input', function(e) {
+    applyTheme(e.target.value, document.body.getAttribute('data-theme') || 'dark');
+    highlightDot(e.target.value);
+  });
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      const color = this.getAttribute('data-color');
+      picker.value = color;
+      applyTheme(color, document.body.getAttribute('data-theme') || 'dark');
+      highlightDot(color);
+    });
+  });
+
+  modeToggle.addEventListener('click', function() {
+    const currentMode = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(picker.value, currentMode);
+  });
+
+  function applyTheme(color, mode) {
+    document.documentElement.style.setProperty('--user-primary', color);
+    localStorage.setItem('jmUserThemeColor', color);
+    if (mode === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+      modeToggle.textContent = '🌙 暗';
+      localStorage.setItem('jmUserThemeMode', 'light');
+    } else {
+      document.body.removeAttribute('data-theme');
+      modeToggle.textContent = '☀️ 亮';
+      localStorage.setItem('jmUserThemeMode', 'dark');
+    }
+  }
+
+  function highlightDot(color) {
+    dots.forEach(d => d.classList.toggle('active', d.getAttribute('data-color').toLowerCase() === color.toLowerCase()));
+  }
+})();
+
+window.resetTheme = function() {
+  const defaultColor = '#c77dff';
+  document.getElementById('themeColorPicker').value = defaultColor;
+  document.documentElement.style.setProperty('--user-primary', defaultColor);
+  localStorage.setItem('jmUserThemeColor', defaultColor);
+  document.body.removeAttribute('data-theme');
+  const modeToggle = document.getElementById('themeModeToggle');
+  if (modeToggle) modeToggle.textContent = '☀️ 亮';
+  localStorage.setItem('jmUserThemeMode', 'dark');
+  document.querySelectorAll('.preset-dot').forEach(d => d.classList.toggle('active', d.getAttribute('data-color') === defaultColor));
+};
+/* ==================== 基础文本加密算法（与 v1.2 密文完全兼容） ==================== */
+const SYMS="!@#$%^&*()-_{}[],;:<.>?~`";
+const SYM_SET=new Set(SYMS.split(''));
+const BARRED={'1':'Ɉ','2':'ƍ','3':'Ǯ','4':'ƚ','5':'ø','6':'ƒ','7':'ȥ','8':'ɦ','9':'ŧ'};
+const BARRED_REV={'Ɉ':'1','ƍ':'2','Ǯ':'3','ƚ':'4','ø':'5','ƒ':'6','ȥ':'7','ɦ':'8','ŧ':'9'};
+const ODD_MAP={'1':'3','3':'1','5':'7','7':'5','9':'0','0':'9'};
+const SYM_MAP=(()=>{const a=SYMS.split('');const m={};for(let i=0;i<a.length;i++)m[a[i]]=a[a.length-1-i];return m;})();
+function utf8B64(s){return btoa(unescape(encodeURIComponent(s)));}
+function b64Utf8(s){return decodeURIComponent(escape(atob(s)));}
+function xorT(t,k){let r='';for(let i=0;i<t.length;i++)r+=String.fromCharCode(t.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+function atbash(t){let r='';for(let i=0;i<t.length;i++){const c=t.charCodeAt(i);if(c>=65&&c<=90)r+=String.fromCharCode(90-(c-65));else if(c>=97&&c<=122)r+=String.fromCharCode(122-(c-97));else if(c>=48&&c<=57)r+=String.fromCharCode(57-(c-48));else r+=t[i];}return r;}
+function oddSwap(t){return t.replace(/[135790]/g,c=>ODD_MAP[c]||c);}
+function toBarred(t){return t.replace(/[1-9]/g,c=>BARRED[c]||c);}
+function fromBarred(t){return t.replace(/[ɈƍǮƚøƒȥɦŧ]/g,c=>BARRED_REV[c]||c);}
+function insDigit(t){let r='';for(let i=0;i<t.length;i++){r+=t[i];if('02468'.includes(t[i]))r+=Math.floor(Math.random()*10);}return r;}
+function rmDigit(t){let r='';for(let i=0;i<t.length;i++){r+=t[i];if('02468'.includes(t[i])&&i+1<t.length)i++;}return r;}
+function insSym(t,d){
+const step=parseInt(d)||1;const n=t.length;const pos=[];
+for(let i=0;i<n;i+=step+1)pos.push(i+Math.floor(Math.random()*step));
+pos.sort((a,b)=>a-b);
+let r='',j=0;
+for(let p=0;p<n;p++){
+while(j<pos.length&&pos[j]===p){r+=SYMS[Math.floor(Math.random()*SYMS.length)];j++;}
+r+=t[p];
+}
+while(j<pos.length){if(pos[j]<=n)r+=SYMS[Math.floor(Math.random()*SYMS.length)];j++;}
+return r;
+}
+function rmSym(t){let r='';for(let i=0;i<t.length;i++){if(!SYM_SET.has(t[i]))r+=t[i];}return r;}
+function symRev(t){let r='';for(let i=0;i<t.length;i++){r+=SYM_MAP[t[i]]||t[i];}return r;}
+function encrypt(text,key,d){
+let s=xorT(text,key);
+s=utf8B64(s);s=atbash(s);s=oddSwap(s);s=toBarred(s);
+s=insDigit(s);s=insSym(s,d);s=symRev(s);
+return s;
+}
+function decrypt(text,key,d){
+let s=symRev(text);s=rmSym(s);s=rmDigit(s);s=fromBarred(s);
+s=oddSwap(s);s=atbash(s);s=b64Utf8(s);s=xorT(s,key);
+return s;
+}
+/* ==================== 输出样式（佛曰 / 熊语 / 圣人云，仅文本模式） ==================== */
+const STD_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
++"ɈƍǮƚøƒȥɦŧ"
++"!@#$%^&*()-_{}[],;:<.>?~`";
+const STYLE_DEFS={
+buddha:{
+prefix:"佛曰：",
+chars:"冥奢梵呐俱哆怯垢罚夷遮醯耶奚诃磕埵驮磐耷忏魔蹉释跛惮呵烬刍妮蘖嵬隰觳缁沩榄醭趺柝滏隳朦氍觇陧鸺倏笤泶蟓龉龊饕抔戆欷毓氤隹跫戢搦羰霰佛禅僧寺塔钟经莲灯香烛钵偈菩提悟悲智圆寂罗汉刚阎净土沙门比丘居士德法"
+},
+bear:{
+prefix:"熊曰：",
+chars:"哋唕啵嘞唭唝唗啉啋啌啎唪唫啬啭啮啰啲啳喐喒喓啹唩唻唽啿喅喏喖喗嗉嗊嗋嗬嗔嗕嗖嗦嗙嗛嗪嗫嗯嗲嗳嗵嗷嗸嗺嗻嗼嘂嘃嘄嘅嘆嘇嘈嘊嘋嘍嘐嘛嘒嘓嘕嘖嘗嘙嘚唦唰唴唵唶唷唸唹唺嘟嘠嘡嘢嘣嘤嘥嘦嘧嘨嘩嘪嘫嘬嘭嘮嘯嘰咕"
+},
+sage:{
+prefix:"圣人云：",
+chars:"仁义礼智信忠孝廉耻勇温良恭俭让德道天命性心修身齐家治国平下君子圣贤儒学诗书易春秋中庸大论孟孔曾颜冉仲宰贡有路游夏张闵荀董韩程朱陆王阳明诚正格致知意慎独省思言行举止容貌视听动惠刚毅木讷爱己复克弘任重远"
+}
+};
+const STYLE_NAMES={std:'标准',buddha:'佛曰',bear:'熊语',sage:'圣人云'};
+const STYLE_PREFIXES=[
+["佛曰：","buddha"],["佛曰:","buddha"],
+["熊曰：","bear"],["熊曰:","bear"],["熊语：","bear"],["熊语:","bear"],
+["圣人云：","sage"],["圣人云:","sage"],["圣人曰：","sage"],["圣人曰:","sage"]
+];
+const STYLE_REV_MAPS={};
+for(const k in STYLE_DEFS){
+const cs=STYLE_DEFS[k].chars;const m=new Map();
+for(let i=0;i<cs.length;i++)m.set(cs[i],STD_CHARS[i]);
+STYLE_REV_MAPS[k]=m;
+}
+let curStyle='std';
+let lastCipher='';
+/* ==================== 历史记录（只显示明文） ==================== */
+let historyList=[];
+function loadHistoryFromStorage(){
+try{const raw=sessionStorage.getItem('jmEncHistory');if(raw)historyList=JSON.parse(raw);}catch(e){}
+renderHistory();
+}
+function saveHistory(type,plaintext,ciphertext){
+const entry={
+id:Date.now()+Math.random(),
+type,
+plaintext:String(plaintext||'').substring(0,500),
+ciphertext:String(ciphertext||''),
+time:new Date().toLocaleTimeString()
+};
+historyList=historyList.filter(h=>h.plaintext!==entry.plaintext);
+historyList.unshift(entry);
+if(historyList.length>30)historyList.pop();
+try{sessionStorage.setItem('jmEncHistory',JSON.stringify(historyList));}catch(e){}
+renderHistory();
+}
+function renderHistory(){
+const list=document.getElementById('historyList');
+if(!list)return;
+if(mode!=='text'){document.getElementById('historyBlock').style.display='none';return;}
+document.getElementById('historyBlock').style.display=historyList.length>0?'block':'none';
+if(historyList.length===0){list.innerHTML='<div class="hist-empty">暂无记录</div>';return;}
+list.innerHTML=historyList.map(h=>'<div class="hist-item" onclick="loadHistory('+h.id+')">'
++'<div class="hist-meta"><span class="hist-tag '+h.type+'">'+(h.type==='enc'?'🔒 加密':'🔓 解密')+'</span>'
++'<span style="display:flex;align-items:center;gap:6px;"><span class="hist-time">'+h.time+'</span>'
++'<span class="hist-mini-btn" onclick="event.stopPropagation();deleteHistory('+h.id+')" style="padding:1px 6px;font-size:10px;">✖</span></span></div>'
++'<div class="hist-text">'+escapeHtml(h.plaintext)+'</div></div>').join('');
+}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function loadHistory(id){
+const h=historyList.find(x=>x.id===id);if(!h)return;
+if(h.type==='enc'){document.getElementById('input').value=h.plaintext;document.getElementById('output').value=h.ciphertext;}
+else{document.getElementById('input').value='';document.getElementById('output').value=h.plaintext;}
+}
+function deleteHistory(id){historyList=historyList.filter(x=>x.id!==id);try{sessionStorage.setItem('jmEncHistory',JSON.stringify(historyList));}catch(e){}renderHistory();}
+function clearHistory(){if(!confirm('确定清空所有历史记录？'))return;historyList=[];try{sessionStorage.removeItem('jmEncHistory');}catch(e){}renderHistory();}
+
+let mode='text';
+function mapChars(t,from,to){
+const m=new Map();for(let i=0;i<from.length;i++)m.set(from[i],to[i]);
+let r='';for(let i=0;i<t.length;i++){const v=m.get(t[i]);r+=(v!==undefined?v:t[i]);}
+return r;
+}
+function unstyle(text){
+const t=text.trim();
+for(const [pre,key] of STYLE_PREFIXES){
+if(t.startsWith(pre)){
+const m=STYLE_REV_MAPS[key];
+let r='';
+for(let i=pre.length;i<t.length;i++){
+const c=t[i];
+if(c===' '||c==='\n'||c==='\t'||c==='\r'||c==='\u3000')continue;
+const v=m.get(c);
+if(v!==undefined)r+=v;
+else if(STD_CHARS.includes(c))r+=c;
+}
+return r;
+}
+}
+return null;
+}
+function renderOutput(cipher){
+const o=document.getElementById('output');
+if(curStyle==='std'){
+o.value=cipher;
+}else{
+const st=STYLE_DEFS[curStyle];
+o.value=st.prefix+mapChars(cipher,STD_CHARS,st.chars);
+}
+o.className='out-'+curStyle;
+}
+function setStyle(s){
+curStyle=s;
+document.querySelectorAll('.style-pill').forEach(p=>p.classList.toggle('active',p.dataset.style===s));
+if(lastCipher&&mode==='text'){
+renderOutput(lastCipher);
+status('已切换至「'+STYLE_NAMES[s]+'」样式，密文 '+document.getElementById('output').value.length.toLocaleString()+' 字符');
+}
+}
+/* ==================== 通用工具 ==================== */
+function fmtSize(n){
+if(n<1024)return n+' B';
+if(n<1048576)return (n/1024).toFixed(1)+' KB';
+return (n/1048576).toFixed(2)+' MB';
+}
+function extFromMime(mime){
+let e=(mime.split('/')[1]||'png').split('+')[0].toLowerCase();
+if(e==='jpeg')e='jpg';else if(e==='x-icon'||e==='vnd.microsoft.icon')e='ico';
+return e;
+}
+function replaceExt(name,ext){
+const base=name.replace(/\.[a-zA-Z0-9]{1,6}$/,'');
+return base+'.'+ext;
+}
+function utf8Bytes(s){return new TextEncoder().encode(s);}
+function utf8Str(b){return new TextDecoder().decode(b);}
+function bytesToDataUrl(bytes,mime){
+let bin='';
+const CH=32768;
+for(let i=0;i<bytes.length;i+=CH)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));
+return 'data:'+mime+';base64,'+btoa(bin);
+}
+function dataUrlToBytes(dataUrl){
+const b64=dataUrl.split(',')[1]||'';
+const bin=atob(b64);
+const u=new Uint8Array(bin.length);
+for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+return u;
+}
+function loadImg(src){
+return new Promise((res,rej)=>{
+const im=new Image();
+im.onload=()=>res(im);
+im.onerror=()=>rej(new Error('图片加载失败'));
+im.src=src;
+});
+}
+function status(msg){document.getElementById('statusLine').textContent=msg;}
+let toastTimer=null;
+function toast(msg,isErr){
+const t=document.getElementById('toast');
+t.textContent=msg;
+t.className=(isErr?'err ':'')+'show';
+clearTimeout(toastTimer);
+toastTimer=setTimeout(()=>{t.className='';},3200);
+}
+/* ==================== 密图核心（图片 ⇄ 图片） ==================== */
+const MG_MAGIC=[0x4D,0x47,0x43,0x52];   // "MGCR"
+const MG_HDR=8;
+function rc4Init(key){
+const kb=utf8Bytes(key);
+const S=new Uint8Array(256);
+for(let i=0;i<256;i++)S[i]=i;
+let j=0;
+for(let i=0;i<256;i++){j=(j+S[i]+kb[i%kb.length])&255;const t=S[i];S[i]=S[j];S[j]=t;}
+return S;
+}
+function rc4(S0,data){
+const S=S0.slice();let i=0,j=0;
+const out=new Uint8Array(data.length);
+for(let k=0;k<data.length;k++){
+i=(i+1)&255;j=(j+S[i])&255;
+const t=S[i];S[i]=S[j];S[j]=t;
+out[k]=data[k]^S[(S[i]+S[j])&255];
+}
+return out;
+}
+function isMagicBytes(b){
+return b&&b.length>=4&&b[0]===0x4D&&b[1]===0x47&&b[2]===0x43&&b[3]===0x52;
+}
+async function packToPngBlob(all){
+const px=Math.ceil(all.length/3)||1;
+let w=Math.ceil(Math.sqrt(px));
+w=Math.max(64,Math.min(4096,w));
+const h=Math.max(1,Math.ceil(px/w));
+const cv=document.createElement('canvas');
+cv.width=w;cv.height=h;
+const ctx=cv.getContext('2d');
+const id=ctx.createImageData(w,h);
+const d=id.data;
+for(let k=0;k<all.length;k++){
+d[((k/3)|0)*4+(k%3)]=all[k];
+}
+for(let k=all.length;k<px*3;k++){
+d[((k/3)|0)*4+(k%3)]=(Math.random()*256)|0;
+}
+for(let p=0;p<px;p++)d[p*4+3]=255;
+ctx.putImageData(id,0,0);
+return await new Promise((res,rej)=>{
+cv.toBlob(b=>b?res(b):rej(new Error('PNG 编码失败')),'image/png');
+});
+}
+async function unpackFromPng(dataUrl){
+const img=await loadImg(dataUrl);
+const cv=document.createElement('canvas');
+cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+const ctx=cv.getContext('2d');
+ctx.drawImage(img,0,0);
+const d=ctx.getImageData(0,0,cv.width,cv.height).data;
+const n=cv.width*cv.height*3;
+const all=new Uint8Array(n);
+for(let k=0;k<n;k++)all[k]=d[((k/3)|0)*4+(k%3)];
+return all;
+}
+function buildCipherBytes(fileBytes,name,mime,key){
+const meta=utf8Bytes(JSON.stringify({n:name,m:mime,s:fileBytes.length}));
+const plain=new Uint8Array(4+meta.length+fileBytes.length);
+new DataView(plain.buffer).setUint32(0,meta.length,true);
+plain.set(meta,4);
+plain.set(fileBytes,4+meta.length);
+const enc=rc4(rc4Init(key),plain);
+const all=new Uint8Array(MG_HDR+enc.length);
+all[0]=MG_MAGIC[0];all[1]=MG_MAGIC[1];all[2]=MG_MAGIC[2];all[3]=MG_MAGIC[3];
+all[4]=1;all[5]=0;all[6]=0;all[7]=0;
+all.set(enc,MG_HDR);
+return all;
+}
+function parseCipherBytes(all,key){
+if(!isMagicBytes(all))throw new Error('这不是有效的密图（缺少 MGCR 标识）');
+if(all[4]!==1)throw new Error('密图版本不兼容（v'+all[4]+'），请用新版工具打开');
+const dec=rc4(rc4Init(key),all.subarray(MG_HDR));
+if(dec.length<4)throw new Error('密图数据不完整');
+const metaLen=new DataView(dec.buffer,0,4).getUint32(0,true);
+if(metaLen<=0||metaLen>4096)throw new Error('密钥不正确或密图已损坏');
+let meta;
+try{meta=JSON.parse(utf8Str(dec.subarray(4,4+metaLen)));}
+catch(e){throw new Error('密钥不正确或密图已损坏');}
+if(!meta||typeof meta.n!=='string'||typeof meta.m!=='string'||typeof meta.s!=='number')throw new Error('密钥不正确或密图已损坏');
+const need=4+metaLen+meta.s;
+if(dec.length<need)throw new Error('密图数据不完整（可能被压缩损坏，请以原图/文件方式重发）');
+return{name:meta.n,mime:meta.m,bytes:dec.subarray(4+metaLen,need)};
+}
+/* ==================== 图片文件处理 ==================== */
+let picked=null;
+let cipherResult=null;
+let decResult=null;
+function onFilePicked(inp){handleFile(inp.files&&inp.files[0]);inp.value='';}
+function readFileBytes(f){
+return new Promise((res,rej)=>{
+const rd=new FileReader();
+rd.onload=()=>res(new Uint8Array(rd.result));
+rd.onerror=()=>rej(new Error('读取文件失败'));
+rd.readAsArrayBuffer(f);
+});
+}
+function readFileDataUrl(f){
+return new Promise((res,rej)=>{
+const rd=new FileReader();
+rd.onload=()=>res(String(rd.result));
+rd.onerror=()=>rej(new Error('读取文件失败'));
+rd.readAsDataURL(f);
+});
+}
+async function handleFile(f){
+if(!f)return;
+if(!f.type||!/^image\//.test(f.type)){toast('❌ 请选择图片文件（PNG / JPG / 密图 PNG 等）',true);return;}
+if(f.size>8*1024*1024){toast('❌ 文件超过 8MB，请先压缩后再试',true);return;}
+hideCipherOut();hideDecImage();
+status('⏳ 正在读取图片…');
+try{
+const dataUrl=await readFileDataUrl(f);
+let probe=null;
+try{probe=await unpackFromPng(dataUrl);}catch(e){probe=null;}
+const cipher=!!(probe&&isMagicBytes(probe));
+picked=cipher
+?{kind:'cipher',bytes:probe,name:f.name||'密图.png',mime:f.type,size:f.size,dataUrl}
+:{kind:'src',bytes:await readFileBytes(f),name:f.name||'image.png',mime:f.type,size:f.size,dataUrl};
+const dz=document.getElementById('dropzone');
+dz.classList.toggle('cipher-detected',cipher);
+document.getElementById('dzPreview').style.display='block';
+document.getElementById('dzIdle').style.display='none';
+const im=document.getElementById('previewImg');
+const fi=document.getElementById('fileInfo');
+im.src=dataUrl;
+if(cipher){
+fi.textContent='🔓 检测到密图 · '+fmtSize(f.size);
+fi.className='file-info cipher';
+status('已识别为密图 — 输入密钥后点击「🔓 解密」还原图片');
+}else{
+fi.textContent=f.name+' · '+fmtSize(f.size);
+fi.className='file-info';
+im.onload=()=>{fi.textContent=f.name+' · '+fmtSize(f.size)+' · '+im.naturalWidth+'×'+im.naturalHeight;};
+status('已选择 '+f.name+'（'+fmtSize(f.size)+'）— 输入密钥后点击「🔒 加密」生成密图');
+}
+}catch(e){
+toast('❌ '+e.message,true);status('');
+}
+}
+function clearFile(){
+picked=null;
+document.getElementById('dzPreview').style.display='none';
+document.getElementById('dzIdle').style.display='block';
+document.getElementById('dropzone').classList.remove('cipher-detected');
+document.getElementById('fileInput').value='';
+document.getElementById('previewImg').src='';
+}
+function reencodeJpeg(imgSrc,maxEdge,q){
+return loadImg(imgSrc).then(img=>{
+let w=img.naturalWidth,h=img.naturalHeight;
+if(!w||!h)throw new Error('无法读取尺寸');
+const sc=Math.min(1,maxEdge/Math.max(w,h));
+w=Math.max(1,Math.round(w*sc));h=Math.max(1,Math.round(h*sc));
+const cv=document.createElement('canvas');
+cv.width=w;cv.height=h;
+const ctx=cv.getContext('2d');
+ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+ctx.drawImage(img,0,0,w,h);
+return new Promise((res,rej)=>{
+cv.toBlob(b=>b?res(b):rej(new Error('压缩编码失败')),'image/jpeg',q);
+});
+});
+}
+async function getEncryptSource(){
+const st=picked;
+const doCompress=document.getElementById('autoCompress').checked;
+if(doCompress&&st.size>150*1024&&/image\/(jpeg|png|webp|bmp)/.test(st.mime)){
+try{
+const blob=await reencodeJpeg(st.dataUrl,1600,0.82);
+if(blob&&blob.size<st.size){
+const bytes=new Uint8Array(await blob.arrayBuffer());
+return{bytes,name:replaceExt(st.name,'jpg'),mime:'image/jpeg',compressed:true};
+}
+}catch(e){}
+}
+return{bytes:st.bytes,name:st.name,mime:st.mime,compressed:false};
+}
+function hideCipherOut(){
+cipherResult=null;
+document.getElementById('cipherOut').style.display='none';
+}
+function hideDecImage(){
+decResult=null;
+document.getElementById('imageResult').style.display='none';
+}
+function busy(b){
+['encBtn','decBtn','clrBtn','copyBtn','cpyImgBtn','dlBtn','cpyCipherBtn','dlCipherBtn'].forEach(id=>{
+const e=document.getElementById(id);if(e)e.disabled=b;
+});
+}
+/* ==================== 模式与主流程 ==================== */
+function setMode(m){
+mode=m;
+document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
+const isImg=(m==='image');
+document.getElementById('imageZone').style.display=isImg?'block':'none';
+document.getElementById('inputBlock').style.display=isImg?'none':'block';
+document.getElementById('densityBlock').style.display=isImg?'none':'block';
+document.getElementById('styleBlock').style.display=isImg?'none':'block';
+document.getElementById('outputBlock').style.display=isImg?'none':'block';
+if(isImg){hideCipherOut();hideDecImage();}
+const enc=document.getElementById('encBtn'),dec=document.getElementById('decBtn');
+if(isImg){enc.textContent='🔒 加密';dec.textContent='🔓 解密';}
+else{enc.textContent='🔒 加密';dec.textContent='🔓 解密';clearFile();}
+	if(isImg){document.getElementById('historyBlock').style.display='none';}
+else{renderHistory();}
+status('');
+}
+async function doEnc(){
+const k=document.getElementById('password').value;
+if(mode==='image'){
+if(!picked){toast('❌ 请先放入一张图片',true);return;}
+if(picked.kind==='cipher'){toast('❌ 这已经是密图了，请放入普通图片',true);return;}
+if(!k){toast('❌ 请先输入密钥',true);return;}
+busy(true);status('⏳ 正在生成密图…');
+try{
+const src=await getEncryptSource();
+const all=buildCipherBytes(src.bytes,src.name,src.mime,k);
+const blob=await packToPngBlob(all);
+const dataUrl=await blobToDataUrl(blob);
+cipherResult={
+blob,dataUrl,
+name:replaceExt(src.name,'png').replace(/\.png$/,'')+'.密图.png',
+size:blob.size,from:picked.name,fromSize:picked.size,compressed:src.compressed
+};
+document.getElementById('cipherImg').src=dataUrl;
+document.getElementById('cipherInfo').textContent=
+(src.compressed?'（已自动压缩 '+fmtSize(picked.size)+' → '+fmtSize(src.bytes.length)+'）':'（未压缩）')
++' 密图 '+fmtSize(blob.size)+'，请以「原图」或文件方式发送';
+document.getElementById('cipherOut').style.display='block';
+hideDecImage();
+status('✅ 密图已生成：'+picked.name+'（'+fmtSize(picked.size)+'）→ '+fmtSize(blob.size)+' 噪点图');
+}catch(e){
+toast('❌ 生成密图失败：'+e.message,true);status('');
+}finally{busy(false);}
+return;
+}
+const t=document.getElementById('input').value;
+const d=document.getElementById('density').value;
+busy(true);status('⏳ 正在加密…');
+setTimeout(()=>{
+try{
+lastCipher=encrypt(t,k,d);
+renderOutput(lastCipher);
+	saveHistory('enc',t,lastCipher);
+	status('✅ 加密完成，密文 '+lastCipher.length.toLocaleString()+' 字符');
+}catch(e){
+lastCipher='';
+const o=document.getElementById('output');o.value='';o.className='out-std';
+toast(/URI/i.test(e.message)?'❌ 加密失败：文本或密钥中含 emoji 等特殊字符时可能不兼容，请去除 emoji 或更换密钥后重试':'❌ 加密失败：'+e.message,true);
+status('');
+}finally{busy(false);}
+},30);
+}
+async function doDec(){
+const k=document.getElementById('password').value;
+if(mode==='image'){
+if(!picked){toast('❌ 请先放入密图',true);return;}
+if(picked.kind!=='cipher'){toast('❌ 这是普通图片，不是密图（密图由「加密」生成）',true);return;}
+if(!k){toast('❌ 请先输入密钥',true);return;}
+busy(true);status('⏳ 正在解密密图…');
+try{
+const all=(picked.bytes&&picked.bytes.length>=MG_HDR)?picked.bytes:await unpackFromPng(picked.dataUrl);
+const r=parseCipherBytes(all,k);
+const blob=new Blob([r.bytes],{type:r.mime});
+const dataUrl=await blobToDataUrl(blob);
+decResult={blob,dataUrl,name:r.name,mime:r.mime,size:r.bytes.length};
+const im=document.getElementById('decImg');
+im.onerror=()=>{im.onerror=null;im.src='';};
+im.src=dataUrl;
+document.getElementById('decInfo').textContent=r.name+' · '+fmtSize(r.bytes.length);
+im.onload=()=>{document.getElementById('decInfo').textContent=r.name+' · '+fmtSize(r.bytes.length)+' · '+im.naturalWidth+'×'+im.naturalHeight;};
+document.getElementById('imageResult').style.display='block';
+hideCipherOut();
+status('✅ 解密成功：'+r.name+'（'+fmtSize(r.bytes.length)+'）');
+}catch(e){
+toast('❌ '+e.message,true);status('');
+}finally{busy(false);}
+return;
+}
+let t=document.getElementById('input').value.trim();
+if(!t){toast('❌ 请先输入要解密的密文',true);return;}
+const d=document.getElementById('density').value;
+const unst=unstyle(t);
+t=(unst!==null)?unst:t.replace(/\s+/g,'');
+busy(true);status('⏳ 正在解密…');
+setTimeout(()=>{
+try{
+const plain=decrypt(t,k,d);
+lastCipher='';
+const o=document.getElementById('output');
+o.value=plain;o.className='out-std';
+	saveHistory('dec',plain,t);
+status('✅ 解密完成，共 '+plain.length.toLocaleString()+' 字符');
+}catch(e){
+toast('❌ 解密失败：请检查密文、样式与密钥是否正确',true);
+status('');
+}finally{busy(false);}
+},30);
+}
+function clearInput(){
+const inp = document.getElementById('input');
+inp.value = '';
+inp.focus();
+}
+
+function doClear(){
+document.getElementById('input').value='';
+const o=document.getElementById('output');
+o.value='';o.className='out-std';
+lastCipher='';
+clearFile();
+hideCipherOut();
+hideDecImage();
+status('');
+}
+/* ==================== 下载 / 复制 ==================== */
+function blobToDataUrl(blob){
+return new Promise((res,rej)=>{
+const rd=new FileReader();
+rd.onload=()=>res(String(rd.result));
+rd.onerror=()=>rej(new Error('读取数据失败'));
+rd.readAsDataURL(blob);
+});
+}
+function downloadBlob(blob,name){
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download=name;
+document.body.appendChild(a);a.click();a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+function downloadCipher(){
+if(!cipherResult)return;
+downloadBlob(cipherResult.blob,cipherResult.name);
+toast('⬇ 已开始下载 '+cipherResult.name);
+}
+function downloadDec(){
+if(!decResult)return;
+downloadBlob(decResult.blob,decResult.name);
+toast('⬇ 已开始下载 '+decResult.name);
+}
+function execCopy(txt){
+const ta=document.createElement('textarea');
+ta.value=txt;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;';
+document.body.appendChild(ta);ta.focus();ta.select();
+let ok=false;
+try{ok=document.execCommand('copy');}catch(e){ok=false;}
+ta.remove();return ok;
+}
+async function copyText(txt){
+try{
+if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(txt);return true;}
+}catch(e){}
+return execCopy(txt);
+}
+async function copyImageBlob(blob){
+try{
+if(navigator.clipboard&&window.ClipboardItem){
+await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+return true;
+}
+}catch(e){}
+return false;
+}
+async function copyCipherImage(){
+if(!cipherResult)return;
+const b=document.getElementById('cpyCipherBtn');
+const reset=()=>b.textContent='📋 复制密图';
+let ok=await copyImageBlob(cipherResult.blob);
+if(!ok)ok=await copyText(cipherResult.dataUrl);
+b.textContent=ok?'✅ 密图已复制':'❌ 复制失败';
+setTimeout(reset,1600);
+if(!ok)toast('❌ 复制失败，请直接下载密图发送',true);
+}
+async function copyDecImage(){
+if(!decResult)return;
+const b=document.getElementById('cpyImgBtn');
+const reset=()=>b.textContent='📋 复制图片';
+let blob=decResult.blob;
+let ok=false;
+if(decResult.mime==='image/png')ok=await copyImageBlob(blob);
+if(!ok){
+try{
+const img=await loadImg(decResult.dataUrl);
+const cv=document.createElement('canvas');
+cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+cv.getContext('2d').drawImage(img,0,0);
+const png=await new Promise((res,rej)=>cv.toBlob(x=>x?res(x):rej(new Error('转换失败')),'image/png'));
+ok=await copyImageBlob(png);
+if(ok)blob=png;
+}catch(e){}
+}
+if(!ok)ok=await copyText(decResult.dataUrl);
+b.textContent=ok?'✅ 图片已复制':'❌ 复制失败';
+setTimeout(reset,1600);
+if(!ok)toast('❌ 复制失败，请直接下载原图',true);
+}
+let copyTimer=null;
+async function copyResult(){
+const o=document.getElementById('output');
+const b=document.getElementById('copyBtn');
+const reset=()=>b.textContent='📋 一键复制';
+if(!o.value.trim()){
+b.textContent='⚠️ 没有内容可复制';
+clearTimeout(copyTimer);copyTimer=setTimeout(reset,1400);
+return;
+}
+const ok=await copyText(o.value);
+clearTimeout(copyTimer);
+if(ok){
+b.textContent='✅ 已复制到剪贴板';
+copyTimer=setTimeout(reset,1600);
+}else{
+o.focus();
+o.setSelectionRange(0,o.value.length);
+b.textContent='请按 Ctrl+C 完成复制';
+copyTimer=setTimeout(reset,3000);
+}
+}
+function togglePwd(){
+const p=document.getElementById('password');
+p.type=p.type==='password'?'text':'password';
+}
+/* ==================== 拖拽 / 粘贴（仅密图模式） ==================== */
+document.addEventListener('dragover',e=>{
+if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault();
+});
+document.addEventListener('drop',e=>{
+if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){
+e.preventDefault();
+if(mode==='image')handleFile(e.dataTransfer.files&&e.dataTransfer.files[0]);
+}
+});
+document.addEventListener('paste',e=>{
+if(mode!=='image')return;
+const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
+for(const it of items){
+if(it.type&&it.type.startsWith('image/')){
+const f=it.getAsFile();
+if(f){e.preventDefault();handleFile(f);break;}
+}
+}
+});
+
+/* ==================== 初始化历史记录 ==================== */
+loadHistoryFromStorage();
+</script>
+</body>
+</html>
