@@ -1,15 +1,9 @@
-<!--⚠️ 免责声明
-
-本工具仅供学习与娱乐使用，采用自定义加密算法，不具备商业级或军事级安全性。请勿用于加密密码、私钥、个人隐私或其他敏感信息。作者不对因使用本工具导致的任何数据泄露、信息损失或其他后果承担责任。加密前请自行备份原文。 -->
-<!--本程序由玖命和安歌联合创作 -->
-<!-- v1.5.9 自定义主题版 · 新增调色盘换肤 + 预设主题 + 亮暗模式 -->
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>加密 / 解密 v1.5</title>
+<title>加密与压缩工具箱 v2.0</title>
 <style>
 /* ==================== 主题变量 ==================== */
 :root {
@@ -51,7 +45,7 @@
 body{
 font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 background:radial-gradient(ellipse at top,var(--bg-grad-1) 0%,var(--bg-grad-2) 50%,var(--bg-base) 100%);
-min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;
+min-height:100vh;display:flex;flex-direction:column;
 transition:background .4s ease;
 }
 .container{
@@ -247,16 +241,66 @@ box-shadow:0 2px 6px rgba(0,0,0,.3);
 .preset-dot:hover{transform:scale(1.25);border-color:var(--user-primary);}
 .preset-dot.active{border-color:#fff;box-shadow:0 0 8px var(--user-primary);}
 .theme-divider{width:1px;height:20px;background:var(--border-alpha);margin:0 6px;}
+/* ===== 主页导航与视图上下滑动 ===== */
+#topnav{flex:0 0 auto;display:flex;justify-content:center;gap:8px;padding:14px 16px 4px;}
+.nav-tab{
+flex:0 1 auto;padding:8px 18px;border:1.5px solid var(--border-alpha);border-radius:10px;
+font-size:13px;font-weight:700;cursor:pointer;color:var(--text-label);
+background:var(--input-bg);transition:.15s;
+}
+.nav-tab:hover{background:var(--primary-dark);color:#fff;}
+.nav-tab.active{
+color:#fff;background:linear-gradient(135deg,var(--primary-dark),var(--primary-darker));
+border-color:var(--user-primary);box-shadow:0 0 12px var(--primary-glow);
+}
+#viewport{position:relative;flex:1 1 auto;overflow:hidden;}
+.view{
+position:absolute;inset:0;overflow-y:auto;padding:10px 16px 24px;display:flex;
+transform:translateY(100%);visibility:hidden;pointer-events:none;
+transition:transform .45s cubic-bezier(.22,.61,.36,1),visibility 0s linear .45s;
+}
+.view>*{margin:auto;width:100%;}
+.view.active{
+transform:translateY(0);visibility:visible;pointer-events:auto;
+transition:transform .45s cubic-bezier(.22,.61,.36,1),visibility 0s;
+}
+.view.above{transform:translateY(-100%);}
+.view.below{transform:translateY(100%);}
+.home-card{
+display:flex;align-items:center;gap:14px;padding:16px 14px;margin-top:12px;
+border:1.5px solid var(--border-alpha);border-radius:14px;background:var(--input-bg);
+cursor:pointer;transition:.18s;text-align:left;
+}
+.home-card:hover{border-color:var(--user-primary);background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 6px 18px var(--primary-glow);}
+.home-card-icon{font-size:26px;flex:0 0 auto;}
+.home-card-body{flex:1;min-width:0;}
+.home-card-title{font-size:15px;font-weight:700;color:var(--text-title);margin-bottom:3px;}
+.home-card-desc{font-size:12px;color:var(--text-sub);line-height:1.5;}
+.home-card-arrow{font-size:22px;color:var(--text-sub);}
+
+/* 小屏适配：按钮不换行折字 */
+@media (max-width:430px){
+  .btn-group,.img-actions{gap:6px;}
+  .btn-group button,.img-actions button{white-space:nowrap;font-size:13px;padding:10px 10px;flex:1 1 auto;}
+  .theme-row{gap:6px;}
+}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>加密 / 解密</h1>
-<div class="subtitle">v1.5 · 文本加密 · 密图（图片 ⇄ 图片）</div>
+<div id="topnav">
+<button type="button" class="nav-tab active" data-view="home" onclick="go('home')">🏠 主页</button>
+<button type="button" class="nav-tab" data-view="encrypt" onclick="go('encrypt')">🔒 加密</button>
+<button type="button" class="nav-tab" data-view="compress" onclick="go('compress')">🗜 压缩</button>
+</div>
+<div id="viewport">
 
-<!-- ====== 主题面板 ====== -->
+<div class="view active" id="view-home">
+<div class="container">
+<h1>加密与压缩工具箱</h1>
+<div class="subtitle">v2.2 · 本地处理 · 不上传任何数据</div>
+<!-- ====== 主题设置（在主页统一设置，全局生效） ====== -->
 <div class="theme-panel">
-  <div class="theme-panel-title">🎨 自定义主题色</div>
+  <div class="theme-panel-title">🎨 主题设置（全局生效）</div>
   <div class="theme-row">
     <span class="theme-label">调色盘：</span>
     <input type="color" id="themeColorPicker" value="#c77dff" title="自由选择颜色">
@@ -272,6 +316,31 @@ box-shadow:0 2px 6px rgba(0,0,0,.3);
     <button type="button" class="mini-btn" onclick="resetTheme()" style="padding:3px 8px; font-size:11px;">🔄 重置</button>
   </div>
 </div>
+
+<div class="home-card" onclick="go('encrypt')">
+<div class="home-card-icon">🔒</div>
+<div class="home-card-body">
+<div class="home-card-title">加密 / 解密</div>
+<div class="home-card-desc">文本密文（标准 / 佛曰 / 熊语 / 圣人云）· 图片藏进噪点密图，密钥一致即可还原</div>
+</div>
+<div class="home-card-arrow">›</div>
+</div>
+<div class="home-card" onclick="go('compress')">
+<div class="home-card-icon">🗜</div>
+<div class="home-card-body">
+<div class="home-card-title">文本压缩 / 还原</div>
+<div class="home-card-desc">基于 zip.js 的 AdaptiveRangeCoder 自适应算术编码 · 仅限文本 · Base512 / Base64 两种无损模式</div>
+</div>
+<div class="home-card-arrow">›</div>
+</div>
+<div class="hint-line">主题色与亮暗模式在本页设置，改动立即全局生效并自动记住。文本加密的密钥会自动保存在本机，下次打开自动恢复；文本压缩自带历史记录，并默认在压缩后自动复制结果（可在压缩页关闭）。以上偏好与历史都存在浏览器 localStorage，所有数据均在本地处理，不会上传到任何服务器。</div>
+</div>
+</div>
+
+<div class="view" id="view-encrypt">
+<div class="container">
+<h1>加密 / 解密</h1>
+<div class="subtitle">文本加密 · 密图（图片 ⇄ 图片）· 主题色请在主页设置</div>
 
 <div class="mode-tabs">
 <div class="mode-tab active" data-mode="text" onclick="setMode('text')">📝 文本</div>
@@ -307,9 +376,10 @@ box-shadow:0 2px 6px rgba(0,0,0,.3);
 <div id="keyBlock">
 <label>密钥</label>
 <div class="key-row">
-<input type="password" id="password" placeholder="输入密钥...">
+<input type="password" id="password" placeholder="输入密钥..." oninput="rememberKey()" autocomplete="off">
 <span class="toggle-pwd" onclick="togglePwd()">👁</span>
 </div>
+<div class="dz-meta"><span class="file-info">密钥自动保存在本机，打开页面即恢复上一次使用的密钥；把上方密钥清空即取消记住</span></div>
 </div>
 <div id="densityBlock">
 <label>随机符号密度（越小越密）</label>
@@ -365,6 +435,62 @@ box-shadow:0 2px 6px rgba(0,0,0,.3);
 </div>
 </div>
 </div>
+</div><!-- /view-encrypt -->
+
+<div class="view" id="view-compress">
+<div class="container">
+<h1>文本压缩 / 还原</h1>
+<div class="subtitle">zip.js · AdaptiveRangeCoder 自适应算术编码 · 仅限文本 · 完全本地处理</div>
+
+<label>待压缩文本（仅限文本，最多 200000 字）</label>
+<textarea id="zInput" rows="7" placeholder="在此输入或粘贴要压缩的文本…… 也可以在下方载入 .txt / .md / .json 等文本文件" oninput="zUpdateStats()"></textarea>
+<div class="dz-meta"><span id="zSrcInfo" class="file-info">未输入文本</span></div>
+
+<label>编码模式</label>
+<div class="style-row">
+<div class="style-pill active" data-zmode="base512" onclick="setZMode('base512')">Base512（紧凑 · 可视字符）</div>
+<div class="style-pill" data-zmode="base64" onclick="setZMode('base64')">Base64（URL 安全）</div>
+</div>
+
+<div class="btn-group">
+<button class="btn-enc" id="zEncBtn" onclick="doZipEncode()" title="自适应算术编码，把文本压成短串">🗜 压缩</button>
+<button class="btn-dec" id="zDecBtn" onclick="doZipDecode()" title="把压缩结果还原成原文本">🔓 还原</button>
+<button class="btn-clr" onclick="clearCText()">🗑 清空</button>
+</div>
+<label class="compress-row">
+<input type="checkbox" id="zAutoCopy" checked onchange="onZAutoCopyChange()">
+<span>压缩后自动复制结果到剪贴板<br><small>默认开启，仅对「压缩」生效（还原结果不自动复制）；设置会记住，下次打开保持</small></span>
+</label>
+<div id="zStatus" class="status-line"></div>
+
+<label>结果</label>
+<textarea id="zOutput" rows="7" readonly placeholder="压缩或还原后的文本会显示在这里" onclick="if(this.value)this.select()"></textarea>
+<div class="dz-meta"><span id="zOutInfo" class="file-info"></span></div>
+<div class="img-actions">
+<button type="button" class="btn-dl" onclick="downloadZOutput()">⬇ 下载结果</button>
+<button type="button" class="btn-cpyimg" onclick="copyZOutput()">📋 复制结果</button>
+<button type="button" class="mini-btn" onclick="sendOutputToInput()">↩ 送回输入框</button>
+</div>
+
+<div id="zHistoryBlock" style="display:none;">
+<div style="display:flex; align-items:center; justify-content:space-between; margin:12px 0 5px;">
+<label style="margin:0;">🕘 压缩历史</label>
+<button type="button" class="hist-mini-btn" onclick="clearZHistory()" style="padding:2px 8px; font-size:11px;">🗑 清空全部</button>
+</div>
+<div id="zHistoryList"></div>
+</div>
+
+<label>文本文件（可选，载入到输入框）</label>
+<div class="dropzone" id="zDropzone" onclick="document.getElementById('zFileInput').click()">
+<input type="file" id="zFileInput" accept=".txt,.md,.markdown,.json,.csv,.log,.xml,.yml,.yaml,.ini,.js,.ts,.css,.html,.srt" style="display:none" onchange="onZFilePicked(this)">
+<div class="dz-idle">📄 点击选择 / 拖拽文本文件到本页<small>仅纯文本（txt / md / json / csv / log 等），最大 2MB；图片请改用「加密」页的密图功能</small></div>
+</div>
+
+<div class="hint-line">压缩由 zip.js 的 AdaptiveRangeCoder（自适应算术编码）实现，仅限文本、无损可还原：文本重复度越高、字符分布越集中，压缩比越好；随机性强的文本结果可能略大于原文。还原时请选与压缩时一致的模式（若不符会自动尝试另一种）。Base512 结果只含可见字符，Base64 采用 URL 安全字符集。压缩后直接点「还原」会用上一次的压缩结果做往返自检；要还原别处拷来的文本，把内容放进上方输入框即可。每次压缩与还原都会写进下方「压缩历史」（保存在本机，最多 20 条，单条文本超过 20000 字只保留前段），点记录可一键回填输入框与结果框。</div>
+</div>
+</div><!-- /view-compress -->
+
+</div><!-- /viewport -->
 <div id="toast"></div>
 <script>
 /* ==================== 自定义主题色 + 亮暗模式 ==================== */
@@ -579,7 +705,7 @@ o.className='out-'+curStyle;
 }
 function setStyle(s){
 curStyle=s;
-document.querySelectorAll('.style-pill').forEach(p=>p.classList.toggle('active',p.dataset.style===s));
+document.querySelectorAll('.style-pill[data-style]').forEach(p=>p.classList.toggle('active',p.dataset.style===s));
 if(lastCipher&&mode==='text'){
 renderOutput(lastCipher);
 status('已切换至「'+STYLE_NAMES[s]+'」样式，密文 '+document.getElementById('output').value.length.toLocaleString()+' 字符');
@@ -844,7 +970,7 @@ else{renderHistory();}
 status('');
 }
 async function doEnc(){
-const k=document.getElementById('password').value;
+const k=document.getElementById('password').value; rememberKey();
 if(mode==='image'){
 if(!picked){toast('❌ 请先放入一张图片',true);return;}
 if(picked.kind==='cipher'){toast('❌ 这已经是密图了，请放入普通图片',true);return;}
@@ -890,7 +1016,7 @@ status('');
 },30);
 }
 async function doDec(){
-const k=document.getElementById('password').value;
+const k=document.getElementById('password').value; rememberKey();
 if(mode==='image'){
 if(!picked){toast('❌ 请先放入密图',true);return;}
 if(picked.kind!=='cipher'){toast('❌ 这是普通图片，不是密图（密图由「加密」生成）',true);return;}
@@ -1059,29 +1185,567 @@ function togglePwd(){
 const p=document.getElementById('password');
 p.type=p.type==='password'?'text':'password';
 }
-/* ==================== 拖拽 / 粘贴（仅密图模式） ==================== */
+/* ==================== 密钥记忆（localStorage · 自动恢复上次使用的密钥） ==================== */
+const ENC_KEY_STORE='jmEncKey';
+function rememberKey(){
+  const p=document.getElementById('password');
+  if(!p)return;
+  const v=p.value;
+  try{ if(v)localStorage.setItem(ENC_KEY_STORE,v); else localStorage.removeItem(ENC_KEY_STORE); }catch(e){}
+}
+function restoreKey(){
+  const p=document.getElementById('password');
+  if(!p)return;
+  let v='';
+  try{ v=localStorage.getItem(ENC_KEY_STORE)||''; }catch(e){}
+  if(v&&!p.value){ p.value=v; }
+}
+/* ==================== 拖拽 / 粘贴（加密页收图片，压缩页只收文本） ==================== */
 document.addEventListener('dragover',e=>{
 if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault();
 });
 document.addEventListener('drop',e=>{
 if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){
 e.preventDefault();
-if(mode==='image')handleFile(e.dataTransfer.files&&e.dataTransfer.files[0]);
+const f=e.dataTransfer.files&&e.dataTransfer.files[0];
+if(curView==='compress')handleZTextFile(f);
+else if(mode==='image')handleFile(f);
 }
 });
 document.addEventListener('paste',e=>{
-if(mode!=='image')return;
 const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
 for(const it of items){
 if(it.type&&it.type.startsWith('image/')){
 const f=it.getAsFile();
-if(f){e.preventDefault();handleFile(f);break;}
+if(f){
+e.preventDefault();
+if(curView!=='compress'&&mode==='image')handleFile(f);
+break;
+}
 }
 }
 });
 
-/* ==================== 初始化历史记录 ==================== */
+
+/* ==================== 页面导航（主页/加密/压缩，上下滑动切换） ==================== */
+const VIEW_ORDER=['home','encrypt','compress'];
+let curView='home';
+function go(t){
+if(t===curView)return;
+const from=document.getElementById('view-'+curView);
+const to=document.getElementById('view-'+t);
+if(!from||!to)return;
+const down=VIEW_ORDER.indexOf(t)>VIEW_ORDER.indexOf(curView);
+/* 先把新页放到出发点（下方或上方），关掉过渡，再强制回流后开启动画 */
+to.style.transition='none';
+to.classList.remove('active','above','below');
+to.classList.add(down?'below':'above');
+void to.offsetHeight;
+to.style.transition='';
+from.classList.remove('active');
+from.classList.add(down?'above':'below');
+to.classList.remove('above','below');
+to.classList.add('active');
+curView=t;
+document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===t));
+}
+window.go=go;
+document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.dataset.view==='home'));
+
+/* ==================== 文本压缩：zip.js 的 AdaptiveRangeCoder（仅限文本，纯本地） ==================== */
+/* ---- 下面的类代码原样内联自 zip.js，保证 HTML 单文件即可运行 ---- */
+  const STD_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const URL_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+  /**
+   * 自适应算术编码（区间编码）+ 双模式输出（base64 / base512）
+   * - 纯整数运算 + 进位传播，无下溢
+   * - 自适应模型，编解码严格同步，无需传输频率表
+   * - UTF-8 字节流，支持中文 / Emoji
+   * - EOF 终止，解码不需要原始长度
+   */
+  class AdaptiveRangeCoder {
+    constructor(options = {}) {
+  	/**
+  	 * AdaptiveRangeCoder类成员
+  	 * - string:mode:"base64"||"base512" 解码模式
+  	 * - bool:urlSafe:true||false 不用urlsafe模式
+  	 * - const:EOF:255                    EOF字符
+  	 * ...
+  	 */
+      const mode = options.mode || "base512";
+      if (mode !== "base64" && mode !== "base512") throw new Error("mode 必须是 'base64' 或 'base512'");
+      this.mode = mode;
+      this.urlSafe = !!options.urlSafe; // 仅 base64 生效
+
+      this.EOF = 255;
+      this.freq = new Uint32Array(256);
+      this.cum = new Uint32Array(257);
+      this.total = 0;
+      this.out = [];
+      this.inBytes = null;
+      this.pos = 0;
+
+      if (mode === "base64") {
+        this.bits = 6;
+        this.charset = (this.urlSafe ? URL_B64 : STD_B64).split("");
+        this.padChar = "=";
+      } else {
+        this.bits = 9;
+        this.charset = AdaptiveRangeCoder.buildBase512();
+        this.padChar = null;
+      }
+      this.map = new Map();
+      this.charset.forEach((c, i) => {
+        if (this.map.has(c)) throw new Error("字符集重复: " + c);
+        this.map.set(c, i);
+      });
+      if (this.charset.length !== (1 << this.bits)) throw new Error("字符集大小不符: " + this.charset.length);
+    }
+
+    /** 512 个可见字符：排除控制符/空白/组合符/私用区/代理对/象形符号(含 emoji) */
+    static buildBase512() {
+      const bad = /[\p{Cc}\p{Cf}\p{Zs}\p{Zl}\p{Zp}\p{Mn}\p{Mc}\p{Me}\p{Co}\p{Cs}\p{Extended_Pictographic}]/u;
+      const chars = [];
+      for (let cp = 33; cp <= 0x2ff && chars.length < 512; cp++) {
+        const c = String.fromCharCode(cp);
+        if (bad.test(c) || /\s/.test(c)) continue;
+        chars.push(c);
+      }
+      if (chars.length < 512) throw new Error("可用字符不足: " + chars.length);
+      return chars;
+    }
+
+    // ---------- 自适应模型 ----------
+    initModel() { for (let i = 0; i < 256; i++) this.freq[i] = 1; this.rebuildCum(); }
+    rebuildCum() {
+      this.cum[0] = 0;
+      for (let i = 0; i < 256; i++) this.cum[i + 1] = this.cum[i] + this.freq[i];
+      this.total = this.cum[256];
+    }
+    bump(b) {
+      this.freq[b]++;
+      if (this.total > 0xffffff) { for (let i = 0; i < 256; i++) this.freq[i] = Math.max(1, this.freq[i] >> 1); }
+      this.rebuildCum();
+    }
+
+    // ---------- UTF-8 ----------
+    static utf8Bytes(str) {
+      const bytes = [];
+      for (let i = 0; i < str.length; i++) {
+        const cp = str.codePointAt(i);
+        if (cp > 0xffff) i++;
+        if (cp <= 0x7f) bytes.push(cp);
+        else if (cp <= 0x7ff) bytes.push(0xc0 | (cp >> 6), 0x80 | (cp & 0x3f));
+        else if (cp <= 0xffff) bytes.push(0xe0 | (cp >> 12), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        else bytes.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+      }
+      return bytes;
+    }
+    static utf8String(bytes) {
+      let s = ""; let i = 0;
+      while (i < bytes.length) {
+        const b1 = bytes[i++];
+        if (b1 < 0x80) s += String.fromCharCode(b1);
+        else if (b1 < 0xe0) { const b2 = bytes[i++]; s += String.fromCharCode(((b1 & 0x1f) << 6) | (b2 & 0x3f)); }
+        else if (b1 < 0xf0) { const b2 = bytes[i++], b3 = bytes[i++]; s += String.fromCharCode(((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)); }
+        else { const b2 = bytes[i++], b3 = bytes[i++], b4 = bytes[i++]; s += String.fromCodePoint(((b1 & 0x07) << 18) | ((b2 & 0x3f) << 12) | ((b3 & 0x3f) << 6) | (b4 & 0x3f)); }
+      }
+      return s;
+    }
+
+    // ---------- base64：标准 3 字节 -> 4 字符，带 = 填充 ----------
+    static packBase64(bytes, cs, pad) {
+      let s = "";
+      for (let i = 0; i < bytes.length; i += 3) {
+        const b0 = bytes[i], b1 = bytes[i + 1], b2 = bytes[i + 2];
+        s += cs[(b0 >> 2) & 63];
+        s += cs[((b0 << 4) | ((b1 === undefined ? 0 : b1) >> 4)) & 63];
+        s += (b1 === undefined) ? pad : cs[((b1 << 2) | ((b2 === undefined ? 0 : b2) >> 6)) & 63];
+        s += (b2 === undefined) ? pad : cs[b2 & 63];
+      }
+      return s;
+    }
+    static unpackBase64(str, map, pad) {
+      let s = "";
+      for (const ch of str) { if (ch !== pad) s += ch; }
+      const bytes = [];
+      let buf = 0, nb = 0;
+      for (const ch of s) {
+        const v = map.get(ch);
+        if (v === undefined) throw new Error("非法字符: " + JSON.stringify(ch));
+        buf = (buf << 6) | v; nb += 6;
+        if (nb >= 8) { bytes.push((buf >> (nb - 8)) & 0xff); nb -= 8; buf &= (1 << nb) - 1; }
+      }
+      return new Uint8Array(bytes);
+    }
+
+    // ---------- 通用位打包（base512：9 bit/字符，末组右侧补 0，无填充） ----------
+    static packBits(bytes, cs, bits) {
+      const mask = (1 << bits) - 1;
+      const out = [];
+      let buf = 0, nb = 0;
+      for (const b of bytes) {
+        buf = (buf << 8) | b; nb += 8;
+        while (nb >= bits) { out.push(cs[(buf >> (nb - bits)) & mask]); nb -= bits; buf &= (1 << nb) - 1; }
+      }
+      if (nb > 0) out.push(cs[(buf << (bits - nb)) & mask]);
+      return out.join("");
+    }
+    static unpackBits(str, map, bits) {
+      const dataBytes = Math.floor(str.length * bits / 8); // 丢弃末尾补的 0 bit
+      const bytes = new Uint8Array(dataBytes);
+      let buf = 0, nb = 0, k = 0;
+      for (const ch of str) {
+        const v = map.get(ch);
+        if (v === undefined) throw new Error("非法字符: " + JSON.stringify(ch));
+        buf = (buf << bits) | v; nb += bits;
+        while (nb >= 8 && k < dataBytes) { bytes[k++] = (buf >> (nb - 8)) & 0xff; nb -= 8; buf &= (1 << nb) - 1; }
+      }
+      return bytes;
+    }
+
+    pack(bytes) {
+      return this.bits === 6
+        ? AdaptiveRangeCoder.packBase64(bytes, this.charset, this.padChar)
+        : AdaptiveRangeCoder.packBits(bytes, this.charset, this.bits);
+    }
+    unpack(str) {
+      return this.bits === 6
+        ? AdaptiveRangeCoder.unpackBase64(str, this.map, this.padChar)
+        : AdaptiveRangeCoder.unpackBits(str, this.map, this.bits);
+    }
+
+    // ---------- 编码 ----------
+    encodeBytes(text) {
+      this.initModel();
+      this.out = [];
+      let low = 0, range = 0xffffffff;
+
+      const bytes = AdaptiveRangeCoder.utf8Bytes(text);
+      bytes.push(this.EOF);
+
+      for (const b of bytes) {
+        const r = Math.floor(range / this.total);
+        low = low + r * this.cum[b];
+        range = r * this.freq[b];
+
+        // 进位传播：消除下溢
+        if (low >= 0x100000000) {
+          low -= 0x100000000;
+          let k = this.out.length - 1;
+          while (k >= 0) {
+            const v = this.out[k] + 1;
+            this.out[k] = v & 0xff;
+            if (v < 0x100) break;
+            k--;
+          }
+          if (k < 0) throw new Error("进位溢出");
+        }
+
+        while (range < 0x1000000) {
+          this.out.push((low >>> 24) & 0xff);
+          low = (low * 0x100) % 0x100000000;
+          range = (range * 0x100) % 0x100000000;
+        }
+        this.bump(b);
+      }
+
+      for (let i = 0; i < 4; i++) {
+        this.out.push((low >>> 24) & 0xff);
+        low = (low * 0x100) % 0x100000000;
+      }
+      return this.out;
+    }
+    encode(text) { return this.pack(this.encodeBytes(text)); }
+
+    // ---------- 解码（无需原始长度） ----------
+    decode(str) {
+      this.initModel();
+      this.inBytes = this.unpack(str);
+      this.pos = 0;
+
+      let range = 0xffffffff, value = 0;
+      for (let i = 0; i < 4; i++) value = value * 0x100 + this.readByte();
+
+      const result = [];
+      while (true) {
+        const r = Math.floor(range / this.total);
+        let sym = 0;
+        for (let i = 0; i < 256; i++) { if (value < r * this.cum[i + 1]) { sym = i; break; } }
+        value = value - r * this.cum[sym];
+        range = r * this.freq[sym];
+
+        this.bump(sym);
+        if (sym === this.EOF) break;
+        result.push(sym);
+
+        while (range < 0x1000000) {
+          range = (range * 0x100) % 0x100000000;
+          value = value * 0x100 + this.readByte();
+        }
+      }
+      return AdaptiveRangeCoder.utf8String(result);
+    }
+    readByte() {
+      if (this.pos >= this.inBytes.length) throw new Error("码流被截断");
+      return this.inBytes[this.pos++];
+    }
+  }
+const Z_MAX_CHARS = 200000;
+const Z_MAX_FILE = 2 * 1024 * 1024;
+const Z_TEXT_EXT = /\.(txt|md|markdown|json|csv|log|xml|yml|yaml|ini|js|ts|css|html|srt)$/i;
+let zMode = 'base512';
+let zOutText = '';
+let zOutName = '文本压缩结果.txt';
+let zLastSource = '';
+function zStatus(msg) { document.getElementById('zStatus').textContent = msg || ''; }
+function zBusy(b) {
+  ['zEncBtn', 'zDecBtn'].forEach(id => { const e = document.getElementById(id); if (e) e.disabled = b; });
+}
+function zMakeCoder(mode) {
+  return mode === 'base64'
+    ? new AdaptiveRangeCoder({ mode: 'base64', urlSafe: true })
+    : new AdaptiveRangeCoder({ mode: 'base512' });
+}
+function zBytes(s) { return new TextEncoder().encode(s).length; }
+function setZMode(m) {
+  zMode = m;
+  document.querySelectorAll('.style-pill[data-zmode]').forEach(p => p.classList.toggle('active', p.dataset.zmode === m));
+  zUpdateStats();
+}
+function zUpdateStats() {
+  const t = document.getElementById('zInput').value;
+  const el = document.getElementById('zSrcInfo');
+  if (!t) { el.textContent = '未输入文本'; return; }
+  el.textContent = '输入 ' + t.length + ' 字 · ' + fmtSize(zBytes(t)) +
+    ' · 当前模式 ' + (zMode === 'base512' ? 'Base512' : 'Base64') +
+    (t.length > Z_MAX_CHARS ? '（超出 ' + Z_MAX_CHARS + ' 字上限，请删减）' : '');
+}
+function onZFilePicked(inp) { handleZTextFile(inp.files && inp.files[0]); inp.value = ''; }
+async function handleZTextFile(f) {
+  if (!f) return;
+  const isText = (f.type && (f.type.indexOf('text/') === 0 || f.type === 'application/json')) || Z_TEXT_EXT.test(f.name || '');
+  if (!isText) { toast('❌ 压缩页仅支持文本文件，图片请用「加密」页的密图功能', true); return; }
+  if (f.size > Z_MAX_FILE) { toast('❌ 文件超过 2MB，请拆分后再试', true); return; }
+  try {
+    const text = await f.text();
+    if (text.length > Z_MAX_CHARS) toast('❌ 文本超过 ' + Z_MAX_CHARS + ' 字，已截取前面部分', true);
+    document.getElementById('zInput').value = text.slice(0, Z_MAX_CHARS);
+    zUpdateStats();
+    hideZResult();
+    zStatus('已载入 ' + (f.name || '文本') + ' — 点击「压缩」开始');
+  } catch (e) { toast('❌ 读取失败：' + e.message, true); }
+}
+function doZipEncode() {
+  const text = document.getElementById('zInput').value;
+  if (!text) { toast('❌ 请先输入或载入要压缩的文本', true); return; }
+  if (text.length > Z_MAX_CHARS) { toast('❌ 文本超过 ' + Z_MAX_CHARS + ' 字，请先删减', true); return; }
+  zBusy(true); hideZResult(); zStatus('⏳ 正在压缩…');
+  setTimeout(async () => {
+    try {
+      const t0 = (performance && performance.now) ? performance.now() : Date.now();
+      const enc = zMakeCoder(zMode).encode(text);
+      const t1 = (performance && performance.now) ? performance.now() : Date.now();
+      const ok = zMakeCoder(zMode).decode(enc) === text;
+      const srcB = zBytes(text);
+      const pct = srcB > 0 ? Math.round((1 - enc.length / srcB) * 100) : 0;
+      zOutText = enc;
+      zLastSource = text;
+      zOutName = '文本压缩结果-' + (zMode === 'base512' ? 'b512' : 'b64') + '.txt';
+      document.getElementById('zOutput').value = enc;
+      document.getElementById('zOutInfo').textContent = fmtSize(srcB) + ' → ' + fmtSize(enc.length) +
+        (pct > 0 ? '（缩小 ' + pct + '%）' : '（未变小，输出 ' + fmtSize(enc.length) + '）') +
+        ' · 耗时 ' + Math.round(t1 - t0) + 'ms';
+      let zst = (pct > 0 ? '✅ 压缩完成，体积减少 ' + pct + '%' : '✅ 编码完成，但体积未变小（文本随机性较高）') +
+        (ok ? ' · 往返自检通过，可完整还原' : ' · 注意：往返校验未通过');
+      saveZHistory('enc', text, enc, zMode);
+      if (zAutoCopyEnabled()) {
+        let copied = false;
+        try { copied = await copyText(enc); } catch (e) { copied = false; }
+        zst += copied ? ' · 结果已自动复制到剪贴板' : ' · 自动复制未成功，请手动点「复制结果」';
+        if (!copied) toast('⚠️ 自动复制未成功，请手动点「📋 复制结果」', true);
+      }
+      zStatus(zst);
+    } catch (e) {
+      toast('❌ 压缩失败：' + e.message, true); zStatus('');
+    } finally { zBusy(false); }
+  }, 20);
+}
+function doZipDecode() {
+  const boxRaw = document.getElementById('zInput').value || '';
+  let src = boxRaw.trim();
+  let useLast = false;
+  if (zOutText && (src === '' || boxRaw === zLastSource || boxRaw.trim() === zLastSource.trim())) { src = zOutText; useLast = true; }
+  if (!src) { toast('❌ 请先在输入框粘贴要还原的压缩结果', true); return; }
+  zBusy(true); hideZResult(); zStatus('⏳ 正在还原…');
+  setTimeout(() => {
+    const tried = [zMode, zMode === 'base512' ? 'base64' : 'base512'];
+    let lastErr = new Error('未知错误');
+    try {
+      for (const m of tried) {
+        try {
+          const txt = zMakeCoder(m).decode(src);
+          zOutText = txt;
+          zOutName = '文本还原结果.txt';
+          document.getElementById('zOutput').value = txt;
+          document.getElementById('zOutInfo').textContent = 'Base' + (m === 'base512' ? '512' : '64') +
+            ' 还原 → ' + txt.length + ' 字 · ' + fmtSize(zBytes(txt));
+          const mtag = 'Base' + (m === 'base512' ? '512' : '64');
+          saveZHistory('dec', src, txt, m);
+          zStatus('✅ 还原成功（' + mtag + (m === zMode ? ' 模式' : ' 模式，已自动尝试另一种') +
+            (useLast ? '，取自上一次压缩结果' : '') + '）');
+          return;
+        } catch (e) { lastErr = e; }
+      }
+      toast('❌ 还原失败：内容不是本工具生成的压缩结果或已被截断（' + lastErr.message + '）', true);
+      zStatus('');
+    } finally { zBusy(false); }
+  }, 20);
+}
+function clearCText() {
+  document.getElementById('zInput').value = '';
+  document.getElementById('zFileInput').value = '';
+  zUpdateStats(); hideZResult(); zStatus('');
+}
+function hideZResult() {
+  zOutText = ''; zLastSource = ''; zOutName = '文本压缩结果.txt';
+  document.getElementById('zOutput').value = '';
+  document.getElementById('zOutInfo').textContent = '';
+}
+function sendOutputToInput() {
+  if (!zOutText) { toast('❌ 没有可用的结果', true); return; }
+  document.getElementById('zInput').value = zOutText;
+  zUpdateStats();
+  toast('↩ 已把结果送回输入框');
+}
+function downloadZOutput() {
+  if (!zOutText) { toast('❌ 请先压缩或还原一段文本', true); return; }
+  downloadBlob(new Blob([zOutText], { type: 'text/plain;charset=utf-8' }), zOutName);
+  toast('⬇ 已开始下载 ' + zOutName);
+}
+function copyZOutput() {
+  if (!zOutText) { toast('❌ 请先压缩或还原一段文本', true); return; }
+  copyText(zOutText);
+}
+/* ==================== 压缩历史（localStorage 持久化，最多 20 条） ==================== */
+const ZH_STORE = 'jmZipHistory';
+const ZH_MAX = 20;
+const ZH_KEEP = 20000;
+let zHistoryList = [];
+function zClip(s) { s = String(s || ''); return s.length > ZH_KEEP ? s.slice(0, ZH_KEEP) : s; }
+function zNow() {
+  try { return new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+  catch (e) { return new Date().toLocaleString(); }
+}
+function loadZHistoryFromStorage() {
+  try {
+    const raw = localStorage.getItem(ZH_STORE);
+    if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) zHistoryList = a.filter(x => x && x.id); }
+  } catch (e) {}
+  renderZHistory();
+}
+function persistZHistory() {
+  for (let i = 0; i < 4; i++) {
+    try { localStorage.setItem(ZH_STORE, JSON.stringify(zHistoryList)); return true; }
+    catch (e) {
+      if (zHistoryList.length > 2) { zHistoryList = zHistoryList.slice(0, Math.max(2, Math.floor(zHistoryList.length / 2))); continue; }
+      try { zHistoryList = zHistoryList.map(h => Object.assign({}, h, { src: zClip(h.src).slice(0, 2000), result: zClip(h.result).slice(0, 2000) })); } catch (e2) {}
+      try { localStorage.setItem(ZH_STORE, JSON.stringify(zHistoryList)); return true; } catch (e3) { return false; }
+    }
+  }
+  return false;
+}
+function saveZHistory(type, src, result, mode) {
+  const entry = {
+    id: Date.now() + Math.random(), type: type, mode: mode || zMode,
+    src: zClip(src), result: zClip(result),
+    srcChars: String(src || '').length, resChars: String(result || '').length,
+    time: zNow()
+  };
+  zHistoryList = zHistoryList.filter(h => !(h.type === entry.type && h.src === entry.src && h.result === entry.result));
+  zHistoryList.unshift(entry);
+  if (zHistoryList.length > ZH_MAX) zHistoryList = zHistoryList.slice(0, ZH_MAX);
+  persistZHistory();
+  renderZHistory();
+}
+function renderZHistory() {
+  const box = document.getElementById('zHistoryBlock');
+  const list = document.getElementById('zHistoryList');
+  if (!box || !list) return;
+  box.style.display = zHistoryList.length > 0 ? 'block' : 'none';
+  if (zHistoryList.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = zHistoryList.map(h => {
+    const isEnc = h.type === 'enc';
+    const preview = escapeHtml((isEnc ? h.src : h.result) || '').slice(0, 120);
+    const meta = (h.mode === 'base64' ? 'Base64' : 'Base512') + ' · ' +
+      (isEnc ? fmtSize(zBytes(h.src || '')) + ' → ' + fmtSize((h.result || '').length)
+             : fmtSize((h.src || '').length) + ' → ' + fmtSize(zBytes(h.result || ''))) +
+      ' · ' + h.time;
+    const truncated = (h.srcChars > ZH_KEEP || h.resChars > ZH_KEEP) ? '（超长，仅存档前 ' + ZH_KEEP + ' 字）' : '';
+    return '<div class="hist-item" onclick="loadZHistoryItem(' + h.id + ')">' +
+      '<div class="hist-meta"><span class="hist-tag ' + (isEnc ? 'enc' : 'dec') + '">' + (isEnc ? '🗜 压缩' : '🔓 还原') + '</span>' +
+      '<span style="display:flex;align-items:center;gap:6px;"><span class="hist-time">' + meta + '</span>' +
+      '<span class="hist-mini-btn" onclick="event.stopPropagation();deleteZHistory(' + h.id + ')" style="padding:1px 6px;font-size:10px;">✖</span></span></div>' +
+      '<div class="hist-text">' + (preview || '（空内容）') + truncated + '</div></div>';
+  }).join('');
+}
+function loadZHistoryItem(id) {
+  const h = zHistoryList.find(x => x.id === id);
+  if (!h) { toast('❌ 该历史记录已不存在', true); return; }
+  setZMode(h.mode === 'base64' ? 'base64' : 'base512');
+  document.getElementById('zInput').value = h.src || '';
+  document.getElementById('zOutput').value = h.result || '';
+  zOutText = h.result || '';
+  zOutName = h.type === 'enc' ? '文本压缩结果-' + (h.mode === 'base512' ? 'b512' : 'b64') + '.txt' : '文本还原结果.txt';
+  zLastSource = (h.type === 'enc') ? (h.src || '') : '';
+  zUpdateStats();
+  document.getElementById('zOutInfo').textContent = (h.resChars > ZH_KEEP ? '已截断存档 · ' : '') + fmtSize(zBytes(h.result || ''));
+  zStatus('🕘 已载入 ' + (h.type === 'enc' ? '压缩' : '还原') + '历史（' + h.time + '）· 输入框为原始内容，结果框为输出内容');
+  toast('🕘 已载入历史记录');
+}
+function deleteZHistory(id) {
+  zHistoryList = zHistoryList.filter(x => x.id !== id);
+  persistZHistory(); renderZHistory();
+}
+function clearZHistory() {
+  if (!confirm('确定清空所有压缩历史记录？')) return;
+  zHistoryList = [];
+  try { localStorage.removeItem(ZH_STORE); } catch (e) {}
+  renderZHistory();
+  toast('🗑 已清空压缩历史');
+}
+
+/* ==================== 压缩后自动复制（配置项，默认开启，设置记忆） ==================== */
+const ZAC_STORE = 'jmZipAutoCopy';
+function zAutoCopyEnabled() {
+  const c = document.getElementById('zAutoCopy');
+  return !c || c.checked;
+}
+function saveZAutoCopy() {
+  const c = document.getElementById('zAutoCopy');
+  if (!c) return;
+  try { localStorage.setItem(ZAC_STORE, c.checked ? '1' : '0'); } catch (e) {}
+}
+function onZAutoCopyChange() {
+  saveZAutoCopy();
+  toast(zAutoCopyEnabled() ? '✅ 已开启：压缩后自动复制结果' : '⚪ 已关闭：压缩后不再自动复制');
+}
+function restoreZAutoCopy() {
+  let v = null;
+  try { v = localStorage.getItem(ZAC_STORE); } catch (e) {}
+  const c = document.getElementById('zAutoCopy');
+  if (!c) return;
+  c.checked = (v === null) ? true : (v === '1');
+}
+
+zUpdateStats();
+
+/* ==================== 初始化：加密历史 / 压缩历史 / 自动复制 / 密钥恢复 ==================== */
 loadHistoryFromStorage();
+loadZHistoryFromStorage();
+restoreZAutoCopy();
+restoreKey();
 </script>
 </body>
 </html>
